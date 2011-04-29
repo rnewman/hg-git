@@ -683,8 +683,13 @@ class GitHandler(object):
         for tag, sha in self.repo.tags().iteritems():
             if self.repo.tagtype(tag) in ('global', 'git'):
                 tag = tag.replace(' ', '_')
-                self.git.refs['refs/tags/' + tag] = self.map_git_get(hex(sha))
-                self.tags[tag] = hex(sha)
+                sha_hex = hex(sha)
+                tag_ref = self.map_git_get(sha_hex)
+                if not tag_ref:
+                    self.ui.status(_("WARNING: no ref for hg SHA " + sha_hex + "\n"))
+                else:
+                    self.git.refs['refs/tags/' + tag] = tag_ref
+                    self.tags[tag] = sha_hex
 
     def local_heads(self):
         try:
